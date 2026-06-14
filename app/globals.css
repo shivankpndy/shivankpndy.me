@@ -1,0 +1,357 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-jetbrains);
+  
+  /* Refined dark theme colors */
+  --bg: #0a0a0a;
+  --bg-elevated: #111111;
+  --bg-subtle: #171717;
+  --border: #262626;
+  --border-hover: #3f3f46;
+  --text-primary: #ededed;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --accent: #d4d4d8;
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --bg-elevated: #111111;
+  --bg-subtle: #171717;
+  --border: #262626;
+  --border-hover: #3f3f46;
+  --text-primary: #ededed;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+}
+
+/* Light theme - elegant and quiet */
+.light {
+  --bg: #fafafa;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f4f4f5;
+  --border: #e4e4e7;
+  --border-hover: #d4d4d8;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+  --accent: #3f3f46;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Typography */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-feature-settings: "kern" "tnum" "cv05" "cv06";
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+  font-feature-settings: "kern" "tnum" "dlig";
+}
+
+/* Elegant subtle gradient text for headings */
+.heading-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 100% 100%;
+}
+
+.dark .heading-gradient {
+  background: linear-gradient(135deg, #ededed 0%, #71717a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.light .heading-gradient {
+  background: linear-gradient(135deg, #18181b 0%, #52525b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Refined UI Elements */
+.card {
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border);
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background-color: transparent;
+  color: var(--text-primary);
+  transition: all 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-hover);
+}
+
+.btn-primary {
+  background-color: var(--text-primary);
+  color: var(--bg);
+  border-color: var(--text-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.btn-ghost {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-subtle);
+}
+
+/* Form elements */
+input, textarea, select {
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--border-hover);
+  box-shadow: 0 0 0 1px var(--border-hover);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Modal */
+.modal {
+  animation: modalEnter 0.2s cubic-bezier(0.23, 1.0, 0.32, 1);
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Game specific elegant styles */
+.game-grid {
+  display: grid;
+  gap: 0.5rem;
+  background: var(--bg-subtle);
+  padding: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+}
+
+.game-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  color: var(--text-primary);
+  user-select: none;
+}
+
+.game-cell:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  border-color: var(--border-hover);
+  transform: scale(1.01);
+}
+
+.game-cell:disabled {
+  cursor: default;
+}
+
+/* Memory cards flip */
+.memory-card {
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.memory-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+}
+
+.memory-card.flipped .memory-card-inner {
+  transform: rotateY(180deg);
+}
+
+.memory-card-front, .memory-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border: 1px solid var(--border);
+}
+
+.memory-card-front {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+
+.memory-card-back {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  transform: rotateY(180deg);
+}
+
+/* Composer keys */
+.composer-key {
+  transition: all 0.08s cubic-bezier(0.23, 1.0, 0.32, 1);
+  user-select: none;
+}
+
+.composer-key:active {
+  transform: scale(0.96) translateY(1px);
+  background-color: var(--bg-subtle) !important;
+}
+
+/* Light theme overrides for dark Tailwind utilities */
+.light .text-white,
+.light .text-zinc-200,
+.light .text-zinc-300,
+.light .text-zinc-400,
+.light .text-zinc-500,
+.light .text-zinc-600,
+.light .text-zinc-700,
+.light .text-zinc-800,
+.light .text-zinc-900 {
+  color: var(--text-primary) !important;
+}
+
+.light .bg-zinc-950,
+.light .bg-zinc-950\/95,
+.light .bg-zinc-950\/60,
+.light .bg-zinc-950\/50,
+.light .bg-zinc-900,
+.light .bg-zinc-900\/95,
+.light .bg-zinc-900\/70,
+.light .bg-zinc-900\/40,
+.light .bg-zinc-900\/50,
+.light .bg-zinc-800,
+.light .bg-zinc-700 {
+  background-color: var(--bg-elevated) !important;
+}
+
+.light .border-zinc-900,
+.light .border-zinc-900\/70,
+.light .border-zinc-900\/80,
+.light .border-zinc-800,
+.light .border-zinc-700,
+.light .border-zinc-600 {
+  border-color: var(--border) !important;
+}
+
+.light .hover\:text-white:hover,
+.light .group-hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Audio player refined */
+.audio-row {
+  transition: all 0.15s ease;
+}
+
+.audio-row:hover {
+  background-color: var(--bg-subtle);
+}
+
+/* Subtle animations */
+.fade-in {
+  animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Project modal */
+.project-modal-content {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar refined */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-subtle);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .game-cell {
+    font-size: 1.5rem;
+  }
+}
