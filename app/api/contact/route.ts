@@ -1,12 +1,17 @@
 // app/api/contact/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { Resend } from 'resend';
 
 // =============================================
 // CONFIGURATION - ADD YOUR KEYS HERE
 // =============================================
 const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || '';
+const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || '';
+const RESEND_TO_EMAIL = process.env.RESEND_TO_EMAIL || '';
 const RATE_LIMIT_SALT = process.env.RATE_LIMIT_SALT || 'your-super-secret-salt-change-this';
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 // In-memory store for rate limiting (resets on server restart)
 // For production, consider replacing with Redis / Vercel KV
@@ -48,6 +53,15 @@ function createFingerprintString(data: any): string {
     data.platform || '',
     data.screenResolution || '',
   ].join('|');
+}
+
+function escapeHtml(value: string): string {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export async function POST(request: NextRequest) {
@@ -119,13 +133,43 @@ export async function POST(request: NextRequest) {
     // 5. Store hashed identifier with timestamp
     rateLimitStore.set(identifier, now);
 
-    // 6. TODO: Send the actual email here (Resend, Nodemailer, etc.)
-    // For now we just log it (replace with real email sending)
-    console.log('New contact form submission:', {
-      name,
-      email,
-      message: message.substring(0, 100) + '...',
-      timestamp: new Date().toISOString(),
+    // 6. Send the actual email via Resend
+    if (!RESEND_API_KEY || !RESEND_FROM_EMAIL || !RESEND_TO_EMAIL) {
+      console.error('Resend email configuration is incomplete');
+      return NextResponse.json(
+        { error: 'Email service is not configured.' },
+        { status: 500 }
+      );
+    }
+
+    if (!resend) {
+      console.error('Resend client initialization failed');
+      return NextResponse.json(
+        { error: 'Email service client could not be initialized.' },
+        { status: 500 }
+      );
+    }
+
+    const emailHtml = `
+      <div style="font-family: system-ui, sans-serif; color: #111; line-height: 1.5;">
+        <h1 style="font-size: 1.4rem;">New contact form message</h1>
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Message:</strong></p>
+        <div style="white-space: pre-wrap; background: #f8f8f8; border-radius: 12px; padding: 14px; margin-top: 8px;">
+          ${escapeHtml(message)}
+        </div>
+        <hr style="margin: 20px 0; border-color: #ddd;" />
+        <p style="font-size: 0.9rem; color: #555; margin: 0;">Received from the about page contact form.</p>
+      </div>
+    `;
+
+    await resend.emails.send({
+      from: RESEND_FROM_EMAIL,
+      to: RESEND_TO_EMAIL,
+      reply_to: email,
+      subject: `New message from ${name}`,
+      html: emailHtml,
     });
 
     return NextResponse.json(
