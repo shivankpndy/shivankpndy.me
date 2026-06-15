@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     await resend.emails.send({
       from: RESEND_FROM_EMAIL,
       to: RESEND_TO_EMAIL,
-      reply_to: email,
+      replyTo: email,
       subject: `New message from ${name}`,
       html: emailHtml,
     });
