@@ -22,6 +22,15 @@ const pieces: WritingPiece[] = [
     category: "Essay",
     mediumUrl: "https://nonprofitquarterly.org/a-forgotten-1787-society-reveals-the-true-beginnings-of-us-democracy/",
   },
+  {
+    slug: "a-crushed-1891-strike-by-black-farmer-cooperatives-holds-keys-to-economic-justice-today",
+    title: "A Crushed 1891 Strike by Black Farmer Cooperatives Holds Keys to Economic Justice Today",
+    excerpt: "The untold story of a pivotal moment in American labor history and its relevance to contemporary struggles.",
+    date: "Jul 16, 2026",
+    readTime: "12 min",
+    category: "Essay",
+    mediumUrl: "https://nonprofitquarterly.org/a-crushed-1891-strike-by-black-farmer-cooperatives-holds-keys-to-economic-justice-today/",
+  },
 
 ];
 
