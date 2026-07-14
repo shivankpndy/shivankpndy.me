@@ -1,0 +1,15 @@
+# Next.js on Netlify — required so the site is not treated as a plain static folder.
+# Without the OpenNext runtime, Netlify has no index.html to serve → "Page not found".
+# Docs: https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
+
+[build]
+  command = "npm run build"
+  # The Next.js plugin manages what actually gets published; keep this as .next
+  publish = ".next"
+
+[build.environment]
+  # Next.js 16 requires a modern Node
+  NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
