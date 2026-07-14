@@ -44,7 +44,7 @@ export default function Home() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="mb-6 inline-flex items-center rounded-full border border-zinc-800 px-4 py-1 text-xs tracking-[3px] text-zinc-500 font-mono">
-              MUMBAI / INDIA
+              DELHI / INDIA
             </div>
 
             <h1 className="font-serif text-[72px] md:text-[92px] leading-[0.92] tracking-[-3.2px] text-white mb-6">
