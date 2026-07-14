@@ -21,14 +21,18 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Next.js may inject inline scripts; Turnstile loads from Cloudflare
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+      // Next.js inline runtime; Turnstile; Netlify/Cloudflare Web Analytics beacon
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
       // Tailwind / next/font often need inline styles; Google Fonts CSS if used
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob:",
-      "connect-src 'self' https://challenges.cloudflare.com",
+      // Turnstile verify + Cloudflare Insights beacon beacons
+      "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com https://*.cloudflareinsights.com",
       "frame-src https://challenges.cloudflare.com",
+      // Turnstile may use blob workers in some browsers
+      "worker-src 'self' blob:",
+      "child-src 'self' blob: https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

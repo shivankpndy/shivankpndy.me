@@ -60,9 +60,9 @@ export default function RootLayout({
           <Footer />
         </ThemeProvider>
 
-        {/* Cloudflare Turnstile Script - Required for the widget to work */}
+        {/* Explicit render mode — avoids double-render with data-sitekey auto-widgets */}
         <Script
-          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
           strategy="afterInteractive"
         />
       </body>

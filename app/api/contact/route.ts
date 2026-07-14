@@ -5,12 +5,13 @@ import { Resend } from 'resend';
 
 // =============================================
 // CONFIGURATION (from environment only)
+// Must be set in the host (e.g. Netlify env vars). .env.local is local-only.
 // =============================================
-const TURNSTILE_SECRET_KEY = process.env.TURNSTILE_SECRET_KEY || '';
-const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || '';
-const RESEND_TO_EMAIL = process.env.RESEND_TO_EMAIL || '';
-const RATE_LIMIT_SALT = process.env.RATE_LIMIT_SALT || '';
+const TURNSTILE_SECRET_KEY = (process.env.TURNSTILE_SECRET_KEY || '').trim();
+const RESEND_API_KEY = (process.env.RESEND_API_KEY || '').trim();
+const RESEND_FROM_EMAIL = (process.env.RESEND_FROM_EMAIL || '').trim();
+const RESEND_TO_EMAIL = (process.env.RESEND_TO_EMAIL || '').trim();
+const RATE_LIMIT_SALT = (process.env.RATE_LIMIT_SALT || '').trim();
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 const WEAK_RATE_LIMIT_SALTS = new Set([
@@ -147,7 +148,11 @@ export async function POST(request: NextRequest) {
     if (WEAK_RATE_LIMIT_SALTS.has(RATE_LIMIT_SALT)) {
       console.error('RATE_LIMIT_SALT is missing or uses a known-weak default');
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        {
+          error:
+            'Server configuration error: RATE_LIMIT_SALT is missing on the host. Set it in Netlify → Environment variables, then redeploy.',
+          code: 'CONFIG_RATE_LIMIT_SALT',
+        },
         { status: 500 }
       );
     }
@@ -170,7 +175,11 @@ export async function POST(request: NextRequest) {
     if (!TURNSTILE_SECRET_KEY) {
       console.error('TURNSTILE_SECRET_KEY is not set');
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        {
+          error:
+            'Server configuration error: TURNSTILE_SECRET_KEY is missing on the host. Set it in Netlify → Environment variables, then redeploy.',
+          code: 'CONFIG_TURNSTILE',
+        },
         { status: 500 }
       );
     }
@@ -190,6 +199,7 @@ export async function POST(request: NextRequest) {
     const turnstileResult = await turnstileResponse.json();
 
     if (!turnstileResult.success) {
+      console.error('Turnstile verification failed:', turnstileResult['error-codes']);
       return NextResponse.json(
         { error: 'Bot verification failed. Please try again.' },
         { status: 400 }
@@ -218,9 +228,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (!RESEND_API_KEY || !RESEND_FROM_EMAIL || !RESEND_TO_EMAIL) {
-      console.error('Resend email configuration is incomplete');
+      const missing = [
+        !RESEND_API_KEY && 'RESEND_API_KEY',
+        !RESEND_FROM_EMAIL && 'RESEND_FROM_EMAIL',
+        !RESEND_TO_EMAIL && 'RESEND_TO_EMAIL',
+      ].filter(Boolean);
+      console.error('Resend email configuration is incomplete:', missing.join(', '));
       return NextResponse.json(
-        { error: 'Email service is not configured.' },
+        {
+          error: `Email service is not configured. Missing on host: ${missing.join(', ')}. Set them in Netlify → Environment variables, then redeploy.`,
+          code: 'CONFIG_RESEND',
+        },
         { status: 500 }
       );
     }
@@ -248,13 +266,37 @@ export async function POST(request: NextRequest) {
     `;
 
     const subjectName = name.slice(0, 80);
-    await resend.emails.send({
+    // Resend SDK returns { data, error } and does not always throw on API failures
+    const { data: sendData, error: sendError } = await resend.emails.send({
       from: RESEND_FROM_EMAIL,
       to: RESEND_TO_EMAIL,
       replyTo: email,
       subject: `New message from ${subjectName}`,
       html: emailHtml,
     });
+
+    if (sendError) {
+      console.error('Resend send failed:', sendError);
+      const detail =
+        typeof sendError === 'object' && sendError && 'message' in sendError
+          ? String((sendError as { message?: string }).message)
+          : 'Unknown Resend error';
+      return NextResponse.json(
+        {
+          error: `Failed to send email: ${detail}`,
+          code: 'RESEND_SEND_FAILED',
+        },
+        { status: 502 }
+      );
+    }
+
+    if (!sendData?.id) {
+      console.error('Resend returned no message id:', sendData);
+      return NextResponse.json(
+        { error: 'Email provider did not confirm delivery.', code: 'RESEND_NO_ID' },
+        { status: 502 }
+      );
+    }
 
     // Only count toward the rate limit after a successful send
     rateLimitStore.set(identifier, now);

@@ -1,9 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { PenTool, Code2, Music, Sword } from 'lucide-react';
 import Link from 'next/link';
+
+/** Public Turnstile site key (safe to expose). Secret stays server-side. */
+const TURNSTILE_SITE_KEY = '0x4AAAAAADkixz-BipbI58ar';
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        el: HTMLElement,
+        options: { sitekey: string; theme?: string; callback?: (token: string) => void }
+      ) => string;
+      getResponse: (widgetId?: string) => string | undefined;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+  }
+}
 
 const crafts = [
   {
@@ -34,6 +51,8 @@ export default function About() {
   const [submitted, setSubmitted] = useState(false);
   const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
   const [cooldownMessage, setCooldownMessage] = useState('');
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -64,6 +83,16 @@ export default function About() {
       }
     }
 
+    const turnstileToken =
+      (widgetIdRef.current
+        ? window.turnstile?.getResponse?.(widgetIdRef.current)
+        : window.turnstile?.getResponse?.()) || '';
+
+    if (!turnstileToken) {
+      setCooldownMessage('Please complete the bot check before sending.');
+      return;
+    }
+
     setIsSubmitting(true);
     setCooldownMessage('');
 
@@ -76,9 +105,6 @@ export default function About() {
         platform: navigator.platform,
         screenResolution: `${window.screen.width}x${window.screen.height}`,
       };
-
-      // Get Turnstile token
-      const turnstileToken = (window as any).turnstile?.getResponse?.();
 
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -94,14 +120,20 @@ export default function About() {
         }),
       });
 
-      const result = await response.json();
+      let result: { error?: string; success?: boolean; message?: string } = {};
+      try {
+        result = await response.json();
+      } catch {
+        setCooldownMessage('Server returned an invalid response. Please try again later.');
+        return;
+      }
 
       if (!response.ok) {
-        if (response.status === 429) {
-          // Server-side rate limit hit
-          setCooldownMessage(result.error || 'You can only send one message every 24 hours.');
-        } else {
-          alert(result.error || 'Something went wrong. Please try again.');
+        const errText = result.error || 'Something went wrong. Please try again.';
+        // Rate limit and config/provider errors show inline (easier to read than alert)
+        setCooldownMessage(errText);
+        if (widgetIdRef.current) {
+          window.turnstile?.reset?.(widgetIdRef.current);
         }
         return;
       }
@@ -112,8 +144,9 @@ export default function About() {
       setFormData({ name: '', email: '', message: '' });
       setAgreedToPrivacy(false);
 
-      // Reset Turnstile widget
-      (window as any).turnstile?.reset?.();
+      if (widgetIdRef.current) {
+        window.turnstile?.reset?.(widgetIdRef.current);
+      }
 
       // Auto-hide success message and reset form
       setTimeout(() => {
@@ -122,42 +155,45 @@ export default function About() {
 
     } catch (error) {
       console.error('Form submission error:', error);
-      alert('Failed to send message. Please try again later.');
+      setCooldownMessage('Failed to send message. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Ensure Turnstile widget renders when the CF script becomes available.
+  // Explicit Turnstile render only (script uses ?render=explicit). Avoids double-render.
   useEffect(() => {
     let interval: number | undefined;
 
     const tryRender = () => {
-      const t = (window as any).turnstile;
-      if (t && typeof t.render === 'function') {
-        document.querySelectorAll('.cf-turnstile').forEach((el) => {
-          // If the widget already rendered it will contain an iframe
-          if (!el.querySelector('iframe')) {
-            try {
-              t.render(el as HTMLElement, { sitekey: (el as HTMLElement).getAttribute('data-sitekey') });
-            } catch (err) {
-              // ignore render errors and try again
-            }
-          }
-        });
+      const t = window.turnstile;
+      const el = turnstileRef.current;
+      if (!t || !el || widgetIdRef.current) return;
 
-        if (interval) {
-          clearInterval(interval);
-        }
+      try {
+        widgetIdRef.current = t.render(el, {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: 'dark',
+        });
+        if (interval) clearInterval(interval);
+      } catch {
+        // API not fully ready yet; interval will retry
       }
     };
 
-    // Try immediately, then poll every 500ms up to the script load
     tryRender();
-    interval = window.setInterval(tryRender, 500);
+    interval = window.setInterval(tryRender, 400);
 
     return () => {
       if (interval) clearInterval(interval);
+      if (widgetIdRef.current && window.turnstile) {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {
+          // ignore cleanup errors
+        }
+        widgetIdRef.current = null;
+      }
     };
   }, []);
 
@@ -270,16 +306,9 @@ export default function About() {
                 />
               </div>
 
-              {/* Cloudflare Turnstile Widget */}
+              {/* Cloudflare Turnstile — explicit render into this container (see useEffect) */}
               <div className="pt-2">
-                <div className="cf-turnstile" data-sitekey="0x4AAAAAADkixz-BipbI58ar" data-theme="dark"></div>
-                {/* 
-                  === CLOUDFLARE TURNSTILE SETUP ===
-                  1. Go to Cloudflare Dashboard → Turnstile and create a site.
-                  2. Copy your Site Key and replace "YOUR_TURNSTILE_SITE_KEY_HERE" above.
-                  3. Add your Secret Key in `app/api/contact/route.ts`.
-                  4. Make sure the Turnstile script is loaded in layout.tsx or via next/script.
-                */}
+                <div ref={turnstileRef} className="min-h-[65px]" />
               </div>
 
               {/* Privacy Policy Checkbox */}
