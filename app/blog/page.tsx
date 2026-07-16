@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
+import Reveal from '@/components/Reveal';
 
 export default function BlogRedirect() {
   useEffect(() => {
@@ -18,7 +19,7 @@ export default function BlogRedirect() {
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-6">
-      <div className="text-center max-w-md">
+      <Reveal className="text-center max-w-md">
         <div className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-full border border-zinc-800">
           <div className="h-2 w-2 animate-pulse rounded-full bg-white" />
         </div>
@@ -36,7 +37,7 @@ export default function BlogRedirect() {
         <p className="mt-12 text-[10px] text-zinc-600 max-w-[260px] mx-auto">
           Update the redirect URL in <span className="font-mono">app/blog/page.tsx</span> if your publication changes.
         </p>
-      </div>
+      </Reveal>
     </div>
   );
 }

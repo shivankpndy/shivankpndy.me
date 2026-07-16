@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import SmoothScroll from "@/components/SmoothScroll";
 import Script from 'next/script';
 
 const inter = Inter({
@@ -55,6 +56,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[var(--bg)] text-[var(--text-primary)] font-sans">
         <ThemeProvider>
+          <SmoothScroll />
           <Navbar />
           <main className="flex-1 pt-20">{children}</main>
           <Footer />

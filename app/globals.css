@@ -41,8 +41,26 @@
   --accent: #3f3f46;
 }
 
-html {
-  scroll-behavior: smooth;
+/* Lenis drives scrolling via rAF; native smooth-scroll must stay off or it fights Lenis's
+   position updates every frame, which is what causes scroll to stall on long pinned sections. */
+html.lenis {
+  height: auto;
+}
+
+html.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+html.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+html.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+html.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 /* Typography */

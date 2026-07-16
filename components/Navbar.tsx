@@ -13,7 +13,6 @@ const navLinks = [
   { href: '/about', label: 'About' },
   { href: '/writing', label: 'Writing' },
   { href: '/projects', label: 'Projects' },
-  { href: '/records', label: 'Records' },
   { href: '/games', label: 'Games Lab' },
   { href: '/blog', label: 'Blog' },
 ];

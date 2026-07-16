@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, Trophy } from 'lucide-react';
+import Reveal from '@/components/Reveal';
 
 // ==================== TIC TAC TOE ====================
 type Player = 'X' | 'O' | null;
@@ -213,15 +214,15 @@ const MemoryGame = () => {
 export default function GamesLab() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
-      <div className="mb-14 text-center">
+      <Reveal className="mb-14 text-center">
         <div className="uppercase tracking-[3px] text-xs text-zinc-500 font-mono mb-4">PLAY</div>
         <h1 className="font-serif text-6xl tracking-[-2px]">Games Lab</h1>
         <p className="mt-3 max-w-sm mx-auto text-xl text-zinc-400">Small, elegant games built to be played and felt.</p>
-      </div>
+      </Reveal>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <TicTacToe />
-        <MemoryGame />
+        <Reveal><TicTacToe /></Reveal>
+        <Reveal delay={0.08}><MemoryGame /></Reveal>
       </div>
 
       <div className="mt-12 text-center text-xs text-zinc-600 max-w-xs mx-auto">

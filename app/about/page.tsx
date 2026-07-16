@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { PenTool, Code2, Music, Sword } from 'lucide-react';
+import { PenTool, Code2, Sword } from 'lucide-react';
 import Link from 'next/link';
+import Reveal from '@/components/Reveal';
 
 /** Public Turnstile site key (safe to expose). Secret stays server-side. */
 const TURNSTILE_SITE_KEY = '0x4AAAAAADkixz-BipbI58ar';
@@ -32,11 +33,6 @@ const crafts = [
     title: "Coding",
     desc: "Building intentional tools and digital experiences with clean code and thoughtful interfaces.",
     icon: Code2,
-  },
-  {
-    title: "Music",
-    desc: "Composing and recording original pieces that blend melody with emotion and texture.",
-    icon: Music,
   },
   {
     title: "Boxing",
@@ -200,16 +196,16 @@ export default function About() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
       {/* Header */}
-      <div className="mb-16">
+      <Reveal className="mb-16">
         <div className="uppercase tracking-[3px] text-xs text-zinc-500 font-mono mb-4">CHAPTER I</div>
         <h1 className="font-serif text-6xl md:text-7xl tracking-[-2.4px] mb-6">About</h1>
         <p className="max-w-2xl text-xl text-zinc-400">A quiet introduction to who I am right now.</p>
-      </div>
+      </Reveal>
 
       {/* Bio - Unchanged as per your request */}
-      <div className="prose prose-invert max-w-none mb-20 text-[17px] leading-relaxed text-zinc-300">
+      <Reveal delay={0.1} className="prose prose-invert max-w-none mb-20 text-[17px] leading-relaxed text-zinc-300">
         <p className="mb-6">
-          Most of my days begin and end in the same room. It holds my desk, my work, and the hours between training and sleep. I go to the gym to learn discipline, resilience, and how to move with intention. Then I return here to shape the other parts of myself through writing, coding, and music. This room has quietly become the place where much of my life unfolds.
+          Most of my days begin and end in the same room. It holds my desk, my work, and the hours between training and sleep. I go to the gym to learn discipline, resilience, and how to move with intention. Then I return here to shape the other parts of myself through writing and coding. This room has quietly become the place where much of my life unfolds.
         </p>
 
         <p className="mb-6">
@@ -219,29 +215,31 @@ export default function About() {
         <p>
           I don't have a clear map of where this path leads. I only know that I want to keep moving between the ring and this desk with whatever patience and effort I can give. Some days the work feels simple. Other days it asks for more than I think I have. Either way, I come back to it. I put the gloves away, sit down at the same table, and continue. It isn't always easy, but it feels like mine.
         </p>
-      </div>
+      </Reveal>
 
       {/* Crafts - Unchanged */}
       <div className="mb-20">
-        <div className="flex items-center justify-between mb-8">
+        <Reveal className="flex items-center justify-between mb-8">
           <h2 className="font-serif text-4xl tracking-[-1px]">My Crafts</h2>
-        </div>
+        </Reveal>
 
         <div className="grid md:grid-cols-2 gap-4">
           {crafts.map((craft, idx) => {
             const Icon = craft.icon;
             return (
-              <div key={idx} className="card rounded-3xl p-8 group">
-                <div className="flex items-start gap-5">
-                  <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-900 text-zinc-400 group-hover:text-white transition-colors">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-2xl tracking-[-0.4px] mb-3 text-white">{craft.title}</h3>
-                    <p className="text-zinc-400 leading-relaxed text-[15px]">{craft.desc}</p>
+              <Reveal key={idx} delay={idx * 0.08}>
+                <div className="card rounded-3xl p-8 group">
+                  <div className="flex items-start gap-5">
+                    <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-900 text-zinc-400 group-hover:text-white transition-colors">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-2xl tracking-[-0.4px] mb-3 text-white">{craft.title}</h3>
+                      <p className="text-zinc-400 leading-relaxed text-[15px]">{craft.desc}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             );
           })}
         </div>
@@ -249,11 +247,11 @@ export default function About() {
 
       {/* Connect Section with Secure Form */}
       <div id="connect" className="border-t border-zinc-900 pt-16">
-        <div className="max-w-2xl">
+        <Reveal className="max-w-2xl">
           <div className="mb-8">
             <div className="uppercase tracking-[3px] text-xs text-zinc-500 font-mono mb-3">CHAPTER II</div>
             <h2 className="font-serif text-5xl tracking-[-1.4px] mb-4">Connect</h2>
-            <p className="text-lg text-zinc-400">I read every message. Let&apos;s talk about writing, code, music, or the fight.</p>
+            <p className="text-lg text-zinc-400">I read every message. Let&apos;s talk about writing, code, or the fight.</p>
           </div>
 
           {submitted ? (
@@ -349,7 +347,7 @@ export default function About() {
               </p>
             </form>
           )}
-        </div>
+        </Reveal>
       </div>
     </div>
   );
